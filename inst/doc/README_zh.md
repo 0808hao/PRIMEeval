@@ -7,11 +7,13 @@ WIDTH抽样、OFFSET在线预测、LEGACY证据和SUPPORT任务分配。
 
 ## 1. 纯R安装
 
-将PRIMEeval_0.8.0.9001.tar.gz直接放到“二周目”目录，在R中运行：
+将下载的 `PRIMEeval.tar.gz` 放到 R 的当前工作目录（用 `getwd()` 查看），然后运行：
 
 ```r
-install.packages("/media/desk16/iy56901/nature决战/二周目/PRIMEeval_0.8.0.9001.tar.gz",
-                 repos = NULL, type = "source")
+if (!requireNamespace("digest", quietly = TRUE)) {
+  install.packages("digest", repos = "https://cloud.r-project.org")
+}
+install.packages("PRIMEeval.tar.gz", repos = NULL, type = "source")
 library(PRIMEeval)
 ex <- prime_example()
 s <- prime_start(ex$tasks, budget = 8)

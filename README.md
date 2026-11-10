@@ -7,9 +7,14 @@ confirmation. This is a source release candidate for package-level validation.
 
 ## Install in R
 
+Use R >= 4.3.0. Place the downloaded `PRIMEeval.tar.gz` archive in your current
+working directory (shown by `getwd()`), then run:
+
 ```r
-install.packages("/media/desk16/iy56901/nature决战/二周目/PRIMEeval_0.8.0.9001.tar.gz",
-                 repos = NULL, type = "source")
+if (!requireNamespace("digest", quietly = TRUE)) {
+  install.packages("digest", repos = "https://cloud.r-project.org")
+}
+install.packages("PRIMEeval.tar.gz", repos = NULL, type = "source")
 library(PRIMEeval)
 example <- prime_example()
 state <- prime_start(example$tasks, budget = 8)
