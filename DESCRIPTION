@@ -1,0 +1,25 @@
+Package: PRIMEeval
+Type: Package
+Title: Budgeted Sequential Auditing of Paired Model Losses
+Version: 0.8.0.9001
+Authors@R: person("Hongdong", "Hao", email = "h294866@foxmail.com", role = c("aut", "cre", "cph"))
+Description: Sequential auditing of finite populations of bounded paired model
+    loss differences under a shared label-cost budget. Implements public
+    width-based sampling, online offset prediction, a two-stage SUPPORT task
+    allocator, deterministic support certificates, and separately labelled
+    development e-value readouts. Includes deterministic support allocation with affine continuation and
+    a charged early proxy reversal guard, explicit historical calibration,
+    resumable request-and-update interfaces, and an experimental historical
+    query-value allocation option. The implementation is independent of the
+    original development directories and does not retrain prediction models.
+    Development e-value readouts do not establish global cross-task stopping
+    or post-selection error guarantees.
+License: file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.3.0)
+Imports: digest, stats, utils
+NeedsCompilation: no
+ByteCompile: true
+Packaged: 2026-11-03 09:43:12 UTC; root
+Author: Hongdong Hao [aut, cre, cph]
+Maintainer: Hongdong Hao <h294866@foxmail.com>

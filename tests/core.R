@@ -1,0 +1,41 @@
+library(PRIMEeval)
+stopifnot(as.character(packageVersion('PRIMEeval')) == '0.8.0.9001')
+fails <- function(code)tryCatch({force(code);FALSE},error=function(e)TRUE)
+ex <- prime_example()
+s <- prime_start(ex$tasks,budget=8)
+a <- prime_next(s);b <- prime_next(a$state)
+stopifnot(identical(a$request,b$request),nrow(a$request)==1L)
+bad <- a$request;bad$token <- paste0(bad$token,'bad')
+stopifnot(fails(prime_update(a$state,bad,0)),fails(prime_update(a$state,a$request,Inf)))
+y <- ex$query(a$request$task_id,a$request$unit_id,a$request$dataset)
+s1 <- prime_update(a$state,a$request,y)
+stopifnot(fails(prime_update(s1,a$request,y)))
+full <- prime_run(prime_start(ex$tasks,budget=12),ex$query)
+d <- prime_summary(full)
+stopifnot(all(d$used==12L),all(d$full_census),sum(d$record_cost)==36,
+ all(abs(d$support_lower-d$support_upper)<1e-12),identical(as.logical(d$support_only),c(TRUE,FALSE,TRUE)))
+limited <- prime_run(prime_start(ex$tasks,budget=12,allow_full_census=FALSE),ex$query)
+stopifnot(all(prime_summary(limited)$used==11L),!any(prime_summary(limited)$full_census))
+# Pending checkpoints can be restored before the label is obtained.
+f <- tempfile(fileext='.rds');saveRDS(a$state,f);restored <- readRDS(f);unlink(f)
+resumed <- prime_run(restored,ex$query);direct <- prime_run(prime_start(ex$tasks,budget=8),ex$query)
+stopifnot(identical(prime_log(resumed),prime_log(direct)),identical(prime_summary(resumed),prime_summary(direct)))
+# Target labels/scenarios must never enter public task inputs.
+u <- data.frame(support_lower=-.02,support_upper=.04,proxy_generic=.01)
+u$truth <- .03;stopifnot(fails(prime_task(u,'invalid')))
+u$truth <- NULL;u$support_upper <- -.03;stopifnot(fails(prime_task(u,'invalid')))
+# Costs are charged separately to each dataset; no implicit cross-dataset borrowing.
+u <- data.frame(unit_id=1:6,support_lower=-.02,support_upper=.04,proxy_generic=.01,n_audit_records=1)
+tasks <- list(prime_task(u,'a','A'),prime_task(u,'b','B'))
+ss <- prime_run(prime_start(tasks,budget=4,cost_budget=c(A=2,B=5)),function(...) .02)
+d <- prime_summary(ss);stopifnot(d$record_cost[d$dataset=='A']==2,d$record_cost[d$dataset=='B']==5)
+zero <- prime_run(prime_start(tasks,cost_budget=c(A=0,B=0)),function(...)stop('No query should occur'))
+stopifnot(all(prime_summary(zero)$used==0L),is.null(prime_next(zero)$request))
+# Run-local randomization must not alter the caller's RNG stream.
+set.seed(2026);seed <- .Random.seed
+invisible(prime_run(prime_start(ex$tasks),ex$query))
+stopifnot(identical(seed,.Random.seed))
+# A one-unit population and prohibition of its final label terminate cleanly.
+one <- list(prime_task(data.frame(support_lower=-.02,support_upper=.04,proxy_generic=.01),'one'))
+stopifnot(prime_summary(prime_run(prime_start(one,budget=1,allow_full_census=FALSE),function(...) .02))$used==0L)
+cat('PRIMEeval standalone API, costs, evidence, continuation and validation checks passed.\n')

@@ -1,0 +1,5 @@
+bibentry("Manual",
+  title = "PRIMEeval: Budgeted Sequential Auditing of Paired Model Losses",
+  author = person("Hongdong", "Hao"),
+  year = "2026",
+  note = "R package version 0.8.0.9001")
